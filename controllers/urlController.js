@@ -1,73 +1,94 @@
+const URL = require("../models/url");
 const shortid = require("shortid");
-const URL=require("../models/url");
-const shortid=require("shortid");
-async function createShortURL(req,res){
-    const body=req.body;
-    if(!body.redirectURL){
+
+
+// Create Short URL
+async function createShortURL(req, res) {
+
+    const body = req.body;
+
+    if (!body.redirectURL) {
         return res.status(400).json({
-            error:"redirect url is required"
-        })
+            error: "redirectURL is required"
+        });
     }
-const shortId=shortid.generate();
-const url=await URL.create({
-    shortId:shortId,
-    redirectURL:body.redirectURL,
-    totalClicks:0,
-    clickHistory:[]
-});
-return res.status(201).json({
-    shortId:url.shortId,
-    shortURL:`http://localhost:8000/${url.shortId}`,
-    redirectURL: url.redirectURL
-});
-}
 
-async function redirectToURL(req,res){
-    const shortId=req.params.shortId
-    const url=await URL.findOne({
-        shortId:shortId
-    })
-    if(!url){
-        return res.status(400).json({
-            error:"short id not found"
-        })
-    }
-    url.totalClicks=url.totalClicks+1;
-    url.clickHistory.push({
-        timestamp:new Date()
-    }),
-    await url.save();
-    return res.redirect(url.redirectURL)
-}
+    const shortId = shortid.generate();
 
-async function getAnalytics(req,res){
-    const shortId=req.params.shortId;
-    const url = await URL.findOne({
-        shortId:shortId
-    })
-    if(!url){
-        return res.status(404).json({
-            error:"short url not found"
-        })
-    }
-    return res.json({
-
-        shortId: url.shortId,
-
-        redirectURL: url.redirectURL,
-
-        totalClicks: url.totalClicks,
-
-        clickHistory: url.clickHistory
-
+    const url = await URL.create({
+        shortId: shortId,
+        redirectURL: body.redirectURL,
+        totalClicks: 0,
+        clickHistory: []
     });
 
+    console.log("Generated Short ID:", shortId);
+
+    return res.render("result", {
+        shortId: shortId,
+        redirectURL: url.redirectURL
+    });
 }
 
-module.exports={
+
+// Redirect to Original URL
+async function redirectToURL(req, res) {
+
+    const shortId = req.params.shortId;
+
+    console.log("Received Short ID:", shortId);
+
+    const url = await URL.findOne({
+        shortId: shortId
+    });
+
+    if (!url) {
+        return res.status(404).json({
+            error: "Short URL not found"
+        });
+    }
+
+    // Increase click count
+    url.totalClicks = url.totalClicks + 1;
+
+    // Store click time
+    url.clickHistory.push({
+        timestamp: new Date()
+    });
+
+    await url.save();
+
+    // Redirect to original URL
+    return res.redirect(url.redirectURL);
+}
+
+
+// Analytics
+async function getAnalytics(req, res) {
+
+    const shortId = req.params.shortId;
+
+    const url = await URL.findOne({
+        shortId: shortId
+    });
+
+    if (!url) {
+        return res.status(404).json({
+            error: "Short URL not found"
+        });
+    }
+
+    return res.json({
+        shortId: url.shortId,
+        redirectURL: url.redirectURL,
+        totalClicks: url.totalClicks,
+        clickHistory: url.clickHistory
+    });
+}
+
+
+module.exports = {
     createShortURL,
-
     redirectToURL,
-
     getAnalytics
-}
+};

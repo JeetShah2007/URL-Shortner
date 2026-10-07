@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>URL Shortened</title>
+</head>
+
+<body>
+
+    <h1>URL Shortened Successfully!</h1>
+
+    <p>
+        Original URL:
+        <%= redirectURL %>
+    </p>
+
+    <p>
+        Short URL:
+
+        <a href="/url/<%= shortId %>">
+            http://localhost:8000/url/<%= shortId %>
+        </a>
+    </p>
+
+    <br>
+
+    <a href="/">
+        Create another URL
+    </a>
+
+</body>
+
+</html>

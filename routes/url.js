@@ -1,4 +1,5 @@
-const express=require("express");
+const express = require("express");
+
 const {
     createShortURL,
     redirectToURL,
@@ -7,8 +8,17 @@ const {
 
 const router = express.Router();
 
-router.post("/",createShortURL);
-router.get("/analytics/:shortId",getAnalytics)
+
+// Create Short URL
+router.post("/", createShortURL);
+
+
+// Analytics
+router.get("/analytics/:shortId", getAnalytics);
+
+
+// Redirect
 router.get("/:shortId", redirectToURL);
 
-module.exports=router;
+
+module.exports = router;
